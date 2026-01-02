@@ -5,22 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/paulmach/orb/geojson"
 )
 
 // JSONB is a map[string]any that implements [database/sql.Scanner] and [database/sql/driver.Valuer]
 // which represents a binary encoding of JSON for databases
-type JSONB map[string]any
-
-// GetString is a convenience method to get a key from the map and return its string value.
-// It returns false if the key does not exist in the map
-func (j JSONB) GetString(key string) (string, bool) {
-	v, exists := j[key]
-	if exists {
-		return "", false
-	}
-
-	return fmt.Sprintf("%v", v), true
-}
+type JSONB geojson.Properties
 
 // Scan implements [database/sql.Scanner]
 func (j *JSONB) Scan(value interface{}) error {
@@ -41,4 +32,24 @@ func (j JSONB) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return json.Marshal(j)
+}
+
+// MustBool exposes the [geojson.Properties.MustBool] func
+func (j JSONB) MustBool(key string, def ...bool) bool {
+	return geojson.Properties(j).MustBool(key, def...)
+}
+
+// MustInt exposes the [geojson.Properties.MustInt] func
+func (j JSONB) MustInt(key string, def ...int) int {
+	return geojson.Properties(j).MustInt(key, def...)
+}
+
+// MustFloat64 exposes the [geojson.Properties.MustFloat64] func
+func (j JSONB) MustFloat64(key string, def ...float64) float64 {
+	return geojson.Properties(j).MustFloat64(key, def...)
+}
+
+// MustString exposes the [geojson.Properties.MustString] func
+func (j JSONB) MustString(key string, def ...string) string {
+	return geojson.Properties(j).MustString(key, def...)
 }

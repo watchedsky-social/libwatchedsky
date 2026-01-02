@@ -1,6 +1,7 @@
 package geodata
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"encoding/hex"
 	"encoding/json"
@@ -64,18 +65,13 @@ func (g *Geometry) Scan(src any) error {
 		return errors.New("invalid WKB returned")
 	}
 
-	ng := FromOrbGeometry(og)
-	if ng == nil {
-		return errors.New("underlying geometry is nil")
-	}
-
-	*g = *ng
+	*g = Geometry{g: og}
 
 	return nil
 }
 
 // Value implements [database/sql/driver.Valuer]
-func (g *Geometry) Value(src any) (driver.Value, error) {
+func (g *Geometry) Value() (driver.Value, error) {
 	return wkb.Value(g.g).Value()
 }
 
@@ -100,3 +96,10 @@ func (g *Geometry) UnmarshalJSON(data []byte) error {
 	*g = *ng
 	return nil
 }
+
+var (
+	_ driver.Valuer    = new(Geometry)
+	_ sql.Scanner      = new(Geometry)
+	_ json.Marshaler   = new(Geometry)
+	_ json.Unmarshaler = new(Geometry)
+)

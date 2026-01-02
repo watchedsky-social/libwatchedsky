@@ -40,6 +40,7 @@ func commonCommand(cmdName string) GooseCommand {
 			return err
 		}
 
+		goose.SetBaseFS(SQLMigrations)
 		ctx, err = SetSourceDataRoot(ctx, dataDir)
 		return goose.RunContext(ctx, cmdName, db, ".")
 	}

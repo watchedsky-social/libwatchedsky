@@ -1,4 +1,4 @@
-//go:build migrations
+//go:build migrations && fts5
 
 package migrations
 
@@ -17,7 +17,7 @@ func init() {
 }
 
 const (
-	createFulltextTable = `CREATE VIRTUAL TABLE typeahead_index USING fts5(display_string, state_province_code, oid UNINDEXED`
+	createFulltextTable = `CREATE VIRTUAL TABLE typeahead_index USING fts5(display_string, state_province_code, oid UNINDEXED)`
 	getCounties         = `SELECT oid, name, JSONB_EXTRACT('$.state') AS state FROM zones WHERE type = 'county'`
 	getCities           = `SELECT code, name, state, county_oid FROM us_zip_codes`
 	insertEntry         = `INSERT INTO typeahead_index (display_string, state_province_code, oid) VALUES (?, ?, ?)`
@@ -99,23 +99,26 @@ var (
 type countyResult struct {
 	oid   string
 	name  string
-	state string
+	state sql.NullString
 }
 
 func (c countyResult) String() string {
-	return fmt.Sprintf(usCountyDisplayTemplate, c.name, getCountyTerm(c.state), stateCodeMap[strings.ToUpper(c.state)])
+	state := c.state.String
+	return fmt.Sprintf(usCountyDisplayTemplate, c.name, getCountyTerm(state), stateCodeMap[strings.ToUpper(state)])
 }
 
 type cityResult struct {
 	zip       string
 	name      string
-	state     string
-	countyOID string
+	state     sql.NullString
+	countyOID sql.NullString
 }
 
 func (c cityResult) String() string {
-	county := oidResultMap[c.countyOID]
-	return fmt.Sprintf(usCityDisplayTemplate, c.name, county.name, getCountyTerm(c.state), c.zip)
+	county := oidResultMap[c.countyOID.String]
+	state := c.state.String
+
+	return fmt.Sprintf(usCityDisplayTemplate, c.name, county.name, getCountyTerm(state), c.zip)
 }
 
 func upTypeaheadFulltextData(ctx context.Context, tx *sql.Tx) error {
@@ -141,7 +144,8 @@ func upTypeaheadFulltextData(ctx context.Context, tx *sql.Tx) error {
 			return err
 		}
 
-		if _, err = stmt.ExecContext(ctx, c.String(), strings.ToUpper(c.state), c.oid); err != nil {
+		if _, err = stmt.ExecContext(ctx, c.String(), strings.ToUpper(c.state.String),
+			c.oid); err != nil {
 			return err
 		}
 
@@ -160,7 +164,8 @@ func upTypeaheadFulltextData(ctx context.Context, tx *sql.Tx) error {
 			return err
 		}
 
-		if _, err = stmt.ExecContext(ctx, c.String(), strings.ToUpper(c.state), c.countyOID); err != nil {
+		if _, err = stmt.ExecContext(ctx, c.String(), strings.ToUpper(c.state.String),
+			c.countyOID); err != nil {
 			return err
 		}
 	}

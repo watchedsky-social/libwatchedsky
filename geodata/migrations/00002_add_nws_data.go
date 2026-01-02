@@ -6,14 +6,14 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/jghiloni/go-commonutils/v3/values"
 	"github.com/paulmach/orb/geojson"
 	"github.com/paulmach/orb/planar"
 	"github.com/pressly/goose/v3"
-	"github.com/watchedsky-social/geodata/db"
+	"github.com/watchedsky-social/libwatchedsky/geodata"
 )
 
 func init() {
@@ -53,9 +53,18 @@ func upAddNwsData(ctx context.Context, tx *sql.Tx) error {
 
 		centroid, _ := planar.CentroidArea(f.Geometry)
 
-		if _, err = stmt.ExecContext(ctx, values.Must(db.OID("us", f.ID.(string), f.Properties)), f.ID,
-			f.Properties.MustString("name", ""), f.Properties.MustString("type", "public"),
-			db.Geometry{G: centroid}, db.Geometry{G: f.Geometry}, db.JSONB(f.Properties)); err != nil {
+		z := &geodata.Zone{
+			ID:       fmt.Sprintf("%v", f.ID),
+			Name:     f.Properties.MustString("name", ""),
+			Type:     f.Properties.MustString("type", "public"),
+			Metadata: geodata.JSONB(f.Properties),
+			Center:   geodata.FromOrbGeometry(centroid),
+			Geometry: geodata.FromOrbGeometry(f.Geometry),
+		}
+		z.SetOID("us")
+
+		if _, err = stmt.ExecContext(ctx, z.OID(), z.ID, z.Name, z.Type, z.Center, z.Geometry,
+			z.Metadata); err != nil {
 			return err
 		}
 	}

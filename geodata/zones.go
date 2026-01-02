@@ -47,7 +47,7 @@ var (
 // Example: Cuyahoga County, Ohio (home of Case Western Reserve University, my alma mater) has the oid of
 //
 //	oid:ws:us:oh:county:OHC035
-func (z *Zone) SetOID(country string) error {
+func (z *Zone) SetOID(country string) {
 	country = strings.ToLower(country)
 	u, err := url.Parse(z.ID)
 	id := z.ID
@@ -58,20 +58,16 @@ func (z *Zone) SetOID(country string) error {
 	stprov := ""
 	switch country {
 	case "us":
-		stprov, _ = z.Metadata.GetString("state")
+		stprov = z.Metadata.MustString("state", "")
 	}
 
 	if stprov == "" {
 		stprov = "xx"
 	}
 
-	ftype, _ := z.Metadata.GetString("type")
-	if ftype == "" {
-		return fmt.Errorf("%w: cannot determine feature type for %s", ErrCannotGetOID, id)
-	}
+	ftype := z.Metadata.MustString("type", "public")
 
 	z.oid = fmt.Sprintf(oidTemplate, country, strings.ToLower(stprov), strings.ToLower(ftype), id)
-	return nil
 }
 
 func (z *Zone) OID() string {

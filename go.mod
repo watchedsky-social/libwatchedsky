@@ -6,8 +6,7 @@ require (
 	github.com/jghiloni/go-commonutils/v3 v3.3.0
 	github.com/paulmach/orb v0.12.0
 	github.com/pressly/goose/v3 v3.26.0
-	github.com/watchedsky-social/geodata v0.0.2
-	github.com/watchedsky-social/zone-db-builder v0.0.0-20251229163341-6640e2e34de1
+	github.com/watchedsky-social/go-spatialite v1.0.0
 )
 
 require (
@@ -36,6 +35,7 @@ require (
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-sqlite3 v1.14.32 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
 	github.com/mfridman/xflag v0.1.0 // indirect
 	github.com/microsoft/go-mssqldb v1.9.2 // indirect
@@ -46,6 +46,7 @@ require (
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d // indirect
 	github.com/vertica/vertica-sql-go v1.3.3 // indirect
 	github.com/ydb-platform/ydb-go-genproto v0.0.0-20241112172322-ea1f63298f77 // indirect
