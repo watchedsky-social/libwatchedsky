@@ -20,7 +20,7 @@ func init() {
 	goose.AddMigrationContext(upAddNwsData, downAddNwsData)
 }
 
-const insertNwsDataQuery = `INSERT INTO zones (oid, id, name, type, center, geometry, metadata) VALUES (?,?,?,?,ST_GeomFromWKB(?,4326),ST_GeomFromWKB(?,4326),?)`
+const insertNwsDataQuery = `INSERT INTO zones (oid, id, name, type, center, geometry, metadata) VALUES (?,?,?,?,ST_GeomFromWKB(?,4326),GeosMakeValid(ST_GeomFromWKB(?,4326)),?)`
 
 func upAddNwsData(ctx context.Context, tx *sql.Tx) error {
 	datadir, err := SourceDataRoot(ctx)
